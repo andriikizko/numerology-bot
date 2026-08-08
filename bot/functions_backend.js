@@ -199,6 +199,7 @@ exports.createPayment = functions.https.onRequest(async (req, res) => {
         : "Підписка на щоденний гороскоп",
       order_id: orderId,
       server_url: "https://us-central1-numerology-bot-109da.cloudfunctions.net/liqpayWebhook",
+      result_url: "https://numerology-mini-app-self.vercel.app",
     };
     
     if (type === "horoscope") {

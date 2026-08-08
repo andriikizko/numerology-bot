@@ -13,26 +13,38 @@ const App = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Telegram Web App API
+    // Telegram Web App API (якщо відкрито в Telegram)
     const tg = window.Telegram?.WebApp
-    if (tg) {
+    let userId = null
+
+    if (tg && tg.initDataUnsafe?.user) {
       tg.expand()
       tg.ready()
-      
-      const userData = tg.initDataUnsafe?.user
-      if (userData) {
-        loadUserData(userData.id)
-      } else {
-        setLoading(false)
-      }
+      userId = tg.initDataUnsafe.user.id
+    } else {
+      // Веб-режим: беремо ID з localStorage (для тестування поза Telegram)
+      userId = localStorage.getItem('numerology_user_id')
+    }
+
+    if (userId) {
+      loadUserData(userId)
     } else {
       setLoading(false)
     }
+
+    // Оновлюємо дані користувача, коли повертаються на вкладку (наприклад, після оплати)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && userId) {
+        loadUserData(userId)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
   }, [])
 
-  const loadUserData = async (telegramId) => {
+  const loadUserData = async (userId) => {
     try {
-      const response = await fetch(`${API.getUser}?id=${telegramId}`)
+      const response = await fetch(`${API.getUser}?id=${userId}`)
       if (response.ok) {
         const data = await response.json()
         setUser(data)
@@ -46,6 +58,8 @@ const App = () => {
   }
 
   const handleRegistration = (userData) => {
+    // Зберігаємо ID локально, щоб не втратити доступ при перезаході (веб-режим)
+    localStorage.setItem('numerology_user_id', String(userData.telegramId))
     setUser(userData)
     setCurrentPage('menu')
   }

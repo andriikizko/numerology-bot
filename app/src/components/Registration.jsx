@@ -44,7 +44,15 @@ const Registration = ({ onRegister }) => {
       const numberName = getNumberName(pathNumber)
       
       const tg = window.Telegram?.WebApp
-      const telegramId = tg?.initDataUnsafe?.user?.id || Math.random()
+      let telegramId = tg?.initDataUnsafe?.user?.id
+
+      if (!telegramId) {
+        // Веб-режим: генеруємо стабільний ID один раз і зберігаємо
+        telegramId = localStorage.getItem('numerology_user_id')
+        if (!telegramId) {
+          telegramId = `web_${Date.now()}_${Math.floor(Math.random() * 100000)}`
+        }
+      }
 
       const userData = {
         telegramId,
@@ -67,6 +75,10 @@ const Registration = ({ onRegister }) => {
 
       if (response.ok) {
         onRegister(userData)
+      } else {
+        const errText = await response.text()
+        console.error('Registration failed:', response.status, errText)
+        alert('Помилка реєстрації. Спробуйте ще раз.')
       }
     } catch (error) {
       console.error('Помилка реєстрації:', error)
