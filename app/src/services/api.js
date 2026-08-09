@@ -8,4 +8,5 @@ export const API = {
   generateHoroscope: `${BASE_URL}/generateHoroscope`,
   generateReport: `${BASE_URL}/generateReport`,
   createPayment: `${BASE_URL}/createPayment`,
+  generateCalculation: `${BASE_URL}/generateCalculation`,
 };
