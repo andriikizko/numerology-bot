@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react'
 import MainMenu from './components/MainMenu'
-import Today from './components/Today'
-import PersonalReport from './components/PersonalReport'
-import Offers from './components/Offers'
+import ProductPage from './components/ProductPage'
 import Profile from './components/Profile'
 import Registration from './components/Registration'
 import { API } from './services/api'
@@ -13,7 +11,6 @@ const App = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Telegram Web App API (якщо відкрито в Telegram)
     const tg = window.Telegram?.WebApp
     let userId = null
 
@@ -22,7 +19,6 @@ const App = () => {
       tg.ready()
       userId = tg.initDataUnsafe.user.id
     } else {
-      // Веб-режим: беремо ID з localStorage (для тестування поза Telegram)
       userId = localStorage.getItem('numerology_user_id')
     }
 
@@ -32,7 +28,6 @@ const App = () => {
       setLoading(false)
     }
 
-    // Оновлюємо дані користувача, коли повертаються на вкладку (наприклад, після оплати)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && userId) {
         loadUserData(userId)
@@ -58,7 +53,6 @@ const App = () => {
   }
 
   const handleRegistration = (userData) => {
-    // Зберігаємо ID локально, щоб не втратити доступ при перезаході (веб-режим)
     localStorage.setItem('numerology_user_id', String(userData.telegramId))
     setUser(userData)
     setCurrentPage('menu')
@@ -75,9 +69,15 @@ const App = () => {
   return (
     <div className="app-container">
       {currentPage === 'menu' && <MainMenu user={user} onNavigate={setCurrentPage} />}
-      {currentPage === 'today' && <Today user={user} onBack={() => setCurrentPage('menu')} />}
-      {currentPage === 'report' && <PersonalReport user={user} onBack={() => setCurrentPage('menu')} />}
-      {currentPage === 'offers' && <Offers user={user} onBack={() => setCurrentPage('menu')} />}
+      {currentPage === 'product_general' && (
+        <ProductPage user={user} segment="general" onBack={() => setCurrentPage('menu')} />
+      )}
+      {currentPage === 'product_love' && (
+        <ProductPage user={user} segment="love" onBack={() => setCurrentPage('menu')} />
+      )}
+      {currentPage === 'product_money' && (
+        <ProductPage user={user} segment="money" onBack={() => setCurrentPage('menu')} />
+      )}
       {currentPage === 'profile' && <Profile user={user} onBack={() => setCurrentPage('menu')} />}
     </div>
   )

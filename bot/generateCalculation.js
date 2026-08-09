@@ -131,6 +131,15 @@ function prepareGeneral(point, dates) {
         kbFragment: kb.getKnowledgeFragment('general', 'karmicDebt', value),
       };
     }
+    case 'challengesPinnacles': {
+      const { challenges, pinnacles } = calc.calculateChallengesAndPinnacles(userDate);
+      const stage = calc.getCurrentLifeStage(userDate, calc.calculateLifePath(userDate).value);
+      return {
+        resultValue: stage,
+        numbersText: `Поточний етап життя = ${stage}\nВиклики (4 етапи) = ${challenges.join(', ')}\nПіки (4 етапи) = ${pinnacles.join(', ')}\nАктуальний виклик = ${challenges[stage - 1]}\nАктуальний пік = ${pinnacles[stage - 1]}`,
+        kbFragment: kb.getSectionByHeading('general.challengesPinnacles', `ЕТАП ${stage}`),
+      };
+    }
     default:
       throw new Error(`Невідомий пункт: ${point}`);
   }
@@ -336,6 +345,7 @@ exports.generateCalculation = functions.https.onRequest(async (req, res) => {
       birthdayNumber: 'Число дня народження',
       personalCycle: 'Персональний рік/місяць/день',
       karmicDebt: 'Кармічні борги',
+      challengesPinnacles: 'Виклики і піки',
       compatibility: 'Число сумісності партнерів',
       relationshipYears: 'Персональні роки стосунків',
       relationshipMatrix: 'Матриця — сектор стосунків',

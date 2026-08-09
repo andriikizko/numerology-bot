@@ -1,36 +1,35 @@
+const PRODUCTS = [
+  { key: 'general', title: 'Загальний Розрахунок', subtitle: 'Хто ви, куди йдете, ваш потенціал', price: 249, icon: '🔮' },
+  { key: 'love', title: 'Кохання та Сумісність', subtitle: 'Ваша пара, роки стосунків, кармічні уроки', price: 349, icon: '💞' },
+  { key: 'money', title: 'Гроші', subtitle: 'Як заробляти, де ваш фінансовий потенціал', price: 399, icon: '💰' },
+]
+
 const MainMenu = ({ user, onNavigate }) => {
-  const menuItems = [
-    { id: 'today', icon: '📅', label: 'Сьогодні', description: 'Щоденний гороскоп' },
-    { id: 'report', icon: '📊', label: 'Розрахунок', description: '249 грн' },
-    { id: 'offers', icon: '✨', label: 'Пропозиції', description: 'Гороскоп' },
-    { id: 'profile', icon: '👤', label: 'Профіль', description: 'Мої дані' }
-  ]
-
   return (
-    <div className="menu-container">
+    <div className="page-container">
       <div className="header">
-        <h1>🌟 Вітаємо, {user.name}!</h1>
-        <p>Число долі: {user.pathNumber} ({user.numberName})</p>
+        <h1>Привіт, {user.name} 👋</h1>
+        <p>Оберіть свій нумерологічний розрахунок</p>
       </div>
 
-      <div className="menu-grid">
-        {menuItems.map(item => (
+      {PRODUCTS.map((product) => (
+        <div key={product.key} className="product-card">
+          <div style={{ fontSize: 28 }}>{product.icon}</div>
+          <div className="product-title">{product.title}</div>
+          <div className="product-subtitle">{product.subtitle}</div>
+          <div className="product-price">{product.price} грн</div>
           <button
-            key={item.id}
-            className="menu-button"
-            onClick={() => onNavigate(item.id)}
+            onClick={() => onNavigate('product_' + product.key)}
+            className="btn-primary product-cta"
           >
-            <div className="menu-icon">{item.icon}</div>
-            <div className="menu-label">{item.label}</div>
-            <div className="menu-desc">{item.description}</div>
+            Переглянути
           </button>
-        ))}
-      </div>
+        </div>
+      ))}
 
-      <div className="trial-info">
-        {new Date(user.trialUntil) > new Date() && (
-          <p>🎁 Пробний період активний до {new Date(user.trialUntil).toLocaleDateString('uk-UA')}</p>
-        )}
+      <div className="bottom-nav">
+        <button className="active" onClick={() => onNavigate('menu')}>🏠</button>
+        <button onClick={() => onNavigate('profile')}>👤</button>
       </div>
     </div>
   )
