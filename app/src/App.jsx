@@ -58,6 +58,10 @@ const App = () => {
     setCurrentPage('menu')
   }
 
+  const handleUserUpdate = (updatedUser) => {
+    setUser(updatedUser)
+  }
+
   if (loading) {
     return <div className="loading">⏳ Завантаження...</div>
   }
@@ -70,13 +74,13 @@ const App = () => {
     <div className="app-container">
       {currentPage === 'menu' && <MainMenu user={user} onNavigate={setCurrentPage} />}
       {currentPage === 'product_general' && (
-        <ProductPage user={user} segment="general" onBack={() => setCurrentPage('menu')} />
+        <ProductPage user={user} segment="general" onUserUpdate={handleUserUpdate} onBack={() => setCurrentPage('menu')} />
       )}
       {currentPage === 'product_love' && (
-        <ProductPage user={user} segment="love" onBack={() => setCurrentPage('menu')} />
+        <ProductPage user={user} segment="love" onUserUpdate={handleUserUpdate} onBack={() => setCurrentPage('menu')} />
       )}
       {currentPage === 'product_money' && (
-        <ProductPage user={user} segment="money" onBack={() => setCurrentPage('menu')} />
+        <ProductPage user={user} segment="money" onUserUpdate={handleUserUpdate} onBack={() => setCurrentPage('menu')} />
       )}
       {currentPage === 'profile' && <Profile user={user} onBack={() => setCurrentPage('menu')} />}
     </div>
