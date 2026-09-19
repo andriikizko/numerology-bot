@@ -138,8 +138,7 @@ input, button { font-family: inherit; }
 .date { color: var(--pink); font-size: 12.5px; font-weight: 600; }
 
 .id-card {
-  background: linear-gradient(135deg, #2a1620, #1c0f15); border: 1px solid #3a1f2a;
-  border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 16px;
+  display: flex; align-items: center; gap: 16px; padding: 4px 0 0;
 }
 .num-badge {
   width: 58px; height: 58px; border-radius: 14px; background: var(--pink);
@@ -152,8 +151,7 @@ input, button { font-family: inherit; }
 .id-sub { color: var(--gold); font-size: 12.5px; font-weight: 600; margin-top: 3px; }
 
 .horoscope-block {
-  background: radial-gradient(circle at 85% 15%, #4a1f38 0%, #1c0f18 55%, #0d0d0d 100%);
-  border: 1px solid #2a1a22; border-radius: 20px; padding: 18px;
+  padding-top: 14px; border-top: 1px solid #221a1f;
 }
 .h-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .h-tag { color: #F5A8C4; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
@@ -177,9 +175,7 @@ input, button { font-family: inherit; }
 .card-numerolog .card-title, .card-numerolog .card-desc { color: #fff; }
 
 .article-block {
-  margin: 20px 22px 18px;
-  background: linear-gradient(200deg, #241a42 0%, #160f28 55%, #0d0d0d 100%);
-  border: 1px solid #221a32; border-radius: 20px; padding: 18px;
+  padding: 20px 22px 4px; border-top: 1px solid #1c1c1c; margin-top: 6px;
 }
 .article-tag { color: #B8A8F0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px; }
 .article-title { color: #fff; font-size: 16px; font-weight: 700; margin-bottom: 6px; line-height: 1.35; }
