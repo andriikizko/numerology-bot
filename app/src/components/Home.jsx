@@ -1,19 +1,52 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { API } from '../services/api'
 import { calcLifePathLocal, lifePathLabel, PRODUCTS } from '../utils/numerology'
 import { IconHome, IconPerson, IconChart } from './icons'
+
+const DEFAULT_CARDS = [
+  {
+    id: 'marathon', tag: 'Друга воронка', title: 'Марафон успіху',
+    desc: 'Скоро — програма для глибшої трансформації', cta: 'Дізнатись',
+    image: null, gradient: 'linear-gradient(135deg, #D64A7A 0%, #7a2a5a 55%, #3a1a40 100%)', overlayOpacity: 0,
+  },
+  {
+    id: 'numerolog', tag: 'Консультація', title: 'Записатися на сеанс нумеролога',
+    desc: 'Живе спілкування з фахівцем', cta: 'Записатись',
+    image: null, gradient: 'linear-gradient(160deg, #4a3418 0%, #241c10 60%, #0d0d0d 100%)', overlayOpacity: 0,
+  },
+]
 
 const MONTHS = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
 
 const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [cards, setCards] = useState(DEFAULT_CARDS)
 
   const lifePath = calcLifePathLocal(user.birthDate)
   const label = lifePathLabel(lifePath)
 
+  useEffect(() => {
+    fetch(API.getHomeCards)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => { if (data?.cards?.length) setCards(data.cards) })
+      .catch(() => {})
+  }, [])
+
   const today = new Date()
   const dateLabel = `${today.getDate()} ${MONTHS[today.getMonth()]}`
-  const hour = today.getHours()
-  const greet = hour < 12 ? 'Доброго ранку' : hour < 18 ? 'Доброго дня' : 'Доброго вечора'
+
+  const cardStyle = (card) => {
+    if (card.image) {
+      return {
+        backgroundImage: card.overlayOpacity
+          ? `linear-gradient(rgba(0,0,0,${card.overlayOpacity}), rgba(0,0,0,${card.overlayOpacity})), url(${card.image})`
+          : `url(${card.image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }
+    }
+    return { background: card.gradient }
+  }
 
   return (
     <div className="screen home-screen">
@@ -23,7 +56,6 @@ const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
         <div className="home-top">
           <div className="header-row">
             <div>
-              <div className="greet">{greet}</div>
               <div className="name">{user.name || 'Друже'}</div>
               <div className="horo-label" onClick={onOpenMyCalculations}>Мої розрахунки</div>
             </div>
@@ -56,22 +88,16 @@ const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
 
         <div className="scroll-label">Для тебе</div>
         <div className="scroller">
-          <div className="card card-marathon">
-            <div>
-              <div className="card-tag">Друга воронка</div>
-              <div className="card-title">Марафон успіху</div>
-              <div className="card-desc">Скоро — програма для глибшої трансформації</div>
+          {cards.map((card) => (
+            <div key={card.id} className="card" style={cardStyle(card)}>
+              <div>
+                <div className="card-tag">{card.tag}</div>
+                <div className="card-title">{card.title}</div>
+                <div className="card-desc">{card.desc}</div>
+              </div>
+              <div className="card-cta">{card.cta} →</div>
             </div>
-            <div className="card-cta">Дізнатись →</div>
-          </div>
-          <div className="card card-numerolog">
-            <div>
-              <div className="card-tag">Консультація</div>
-              <div className="card-title">Записатися на сеанс нумеролога</div>
-              <div className="card-desc">Живе спілкування з фахівцем</div>
-            </div>
-            <div className="card-cta">Записатись →</div>
-          </div>
+          ))}
         </div>
 
         <div className="article-block">
@@ -94,12 +120,15 @@ const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
           <div className="navicon"><IconPerson /></div>
           <div className="navlabel">Мої дані</div>
         </div>
-        <div className="dotsbtn" onClick={() => setMenuOpen(true)}>
-          <span /><span /><span /><span /><span /><span /><span /><span /><span />
+        <div className="navitem" onClick={() => setMenuOpen(true)}>
+          <div className="dotsbtn">
+            <span /><span /><span /><span /><span /><span /><span /><span /><span />
+          </div>
+          <div className="navlabel">Замовити розрахунок</div>
         </div>
         <div className="navitem" onClick={onOpenMyCalculations}>
           <div className="navicon"><IconChart /></div>
-          <div className="navlabel">Розрахунки</div>
+          <div className="navlabel">Мої розрахунки</div>
         </div>
       </div>
 

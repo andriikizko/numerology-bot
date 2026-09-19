@@ -268,7 +268,32 @@ function prepareMoney(point, dates) {
   }
 }
 
-
+// ---------- Спільні константи (hoisted для повторного використання в session.js) ----------
+const FREE_POINTS = { general: 'lifePath', love: 'compatibility', money: 'moneyFlow' };
+const PREPARE_FN = { general: prepareGeneral, love: prepareLove, money: prepareMoney };
+const SEGMENT_LABELS = { general: 'Загальний Розрахунок', love: 'Кохання та Сумісність', money: 'Гроші' };
+const POINT_LABELS = {
+  lifePath: 'Число долі',
+  birthdayNumber: 'Число дня народження',
+  personalCycle: 'Персональний рік/місяць/день',
+  karmicDebt: 'Кармічні борги',
+  challengesPinnacles: 'Виклики і піки',
+  compatibility: 'Число сумісності партнерів',
+  relationshipYears: 'Персональні роки стосунків',
+  relationshipMatrix: 'Матриця — сектор стосунків',
+  relationshipChallenges: 'Виклики у стосунках',
+  relationshipKarmicDebt: 'Кармічні борги пари',
+  moneyFlow: 'Число грошового потоку',
+  wealthMatrix: "Матриця багатства і кар'єри",
+  financialKarmicDebt: 'Кармічні борги щодо фінансів',
+  financialYear: 'Персональний рік — фінансовий фокус',
+  financialChallenges: 'Виклики у фінансовому контексті',
+};
+const SEGMENT_POINTS = {
+  general: ['lifePath', 'birthdayNumber', 'personalCycle', 'karmicDebt', 'challengesPinnacles'],
+  love: ['compatibility', 'relationshipYears', 'relationshipMatrix', 'relationshipChallenges', 'relationshipKarmicDebt'],
+  money: ['moneyFlow', 'wealthMatrix', 'financialKarmicDebt', 'financialYear', 'financialChallenges'],
+};
 
 // ---------- Головна Cloud Function (onRequest, як і решта функцій проєкту) ----------
 exports.generateCalculation = functions.https.onRequest(async (req, res) => {
@@ -304,7 +329,7 @@ exports.generateCalculation = functions.https.onRequest(async (req, res) => {
       res.status(404).json({ error: 'Користувача не знайдено' });
       return;
     }
-    const { birthDate, motherBirthDate, fatherBirthDate } = userDoc.data();
+    const { birthDate, motherBirthDate, fatherBirthDate, partnerBirthDate } = userDoc.data();
     if (!birthDate || !motherBirthDate || !fatherBirthDate) {
       res.status(412).json({ error: "Не всі обов'язкові дати заповнені (своя, мами, тата)" });
       return;
@@ -312,15 +337,13 @@ exports.generateCalculation = functions.https.onRequest(async (req, res) => {
 
     let partnerDate = null;
     if (segment === 'love') {
-      const partnerDoc = await db.collection('users').doc(userId).collection('partners').doc('current').get();
-      if (!partnerDoc.exists || !partnerDoc.data().birthDate) {
+      if (!partnerBirthDate) {
         res.status(412).json({ error: 'Потрібна дата народження партнера' });
         return;
       }
-      partnerDate = partnerDoc.data().birthDate;
+      partnerDate = partnerBirthDate;
     }
 
-    const FREE_POINTS = { general: 'lifePath', love: 'compatibility', money: 'moneyFlow' };
     const isFree = FREE_POINTS[segment] === point;
     if (!isFree) {
       const hasAccess = await checkUserPurchase(userId, segment);
@@ -331,7 +354,6 @@ exports.generateCalculation = functions.https.onRequest(async (req, res) => {
     }
 
     const dates = { userDate: birthDate, motherDate: motherBirthDate, fatherDate: fatherBirthDate, partnerDate };
-    const PREPARE_FN = { general: prepareGeneral, love: prepareLove, money: prepareMoney };
     const { resultValue, numbersText, kbFragment } = PREPARE_FN[segment](point, dates);
 
     if (!kbFragment) {
@@ -339,28 +361,9 @@ exports.generateCalculation = functions.https.onRequest(async (req, res) => {
       return;
     }
 
-    const segmentLabels = { general: 'Загальний Розрахунок', love: 'Кохання та Сумісність', money: 'Гроші' };
-    const pointLabels = {
-      lifePath: 'Число долі',
-      birthdayNumber: 'Число дня народження',
-      personalCycle: 'Персональний рік/місяць/день',
-      karmicDebt: 'Кармічні борги',
-      challengesPinnacles: 'Виклики і піки',
-      compatibility: 'Число сумісності партнерів',
-      relationshipYears: 'Персональні роки стосунків',
-      relationshipMatrix: 'Матриця — сектор стосунків',
-      relationshipChallenges: 'Виклики у стосунках',
-      relationshipKarmicDebt: 'Кармічні борги пари',
-      moneyFlow: 'Число грошового потоку',
-      wealthMatrix: "Матриця багатства і кар'єри",
-      financialKarmicDebt: 'Кармічні борги щодо фінансів',
-      financialYear: 'Персональний рік — фінансовий фокус',
-      financialChallenges: 'Виклики у фінансовому контексті',
-    };
-
     const userPrompt = buildUserPrompt({
-      segmentLabel: segmentLabels[segment],
-      pointLabel: pointLabels[point],
+      segmentLabel: SEGMENT_LABELS[segment],
+      pointLabel: POINT_LABELS[point],
       accessLabel: isFree ? '🆓 безкоштовний' : '🔒 оплачений',
       numbersText,
       kbFragment,
@@ -391,3 +394,15 @@ async function checkUserPurchase(userId, segment) {
   const purchaseDoc = await db.collection('users').doc(userId).collection('purchases').doc(segment).get();
   return purchaseDoc.exists && purchaseDoc.data().status === 'paid';
 }
+
+module.exports = {
+  generateCalculation: exports.generateCalculation,
+  callGemini,
+  buildUserPrompt,
+  checkUserPurchase,
+  PREPARE_FN,
+  SEGMENT_LABELS,
+  POINT_LABELS,
+  SEGMENT_POINTS,
+  FREE_POINTS,
+};

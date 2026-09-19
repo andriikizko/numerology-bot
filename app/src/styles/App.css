@@ -162,7 +162,7 @@ input, button { font-family: inherit; }
 .scroll-label { color: #fff; font-size: 15px; font-weight: 700; padding: 0 22px; margin: 16px 0 12px; }
 .scroller { display: flex; gap: 14px; overflow-x: auto; padding: 0 22px 4px; scrollbar-width: none; }
 .scroller::-webkit-scrollbar { display: none; }
-.card { min-width: 230px; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
+.card { width: 78%; max-width: 300px; border-radius: 18px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; flex-shrink: 0; }
 .card-marathon { background: linear-gradient(135deg, #D64A7A 0%, #7a2a5a 55%, #3a1a40 100%); min-height: 130px; }
 .card-numerolog { background: linear-gradient(160deg, #4a3418 0%, #241c10 60%, #0d0d0d 100%); border: 1px solid #2a2418; min-height: 130px; }
 .card-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; opacity: 0.8; margin-bottom: 8px; }
@@ -192,7 +192,7 @@ input, button { font-family: inherit; }
 .navitem { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
 .navicon { width: 22px; height: 22px; }
 .navicon svg { width: 100%; height: 100%; display: block; }
-.navlabel { font-size: 10.5px; }
+.navlabel { font-size: 10px; max-width: 76px; text-align: center; line-height: 1.25; }
 .navitem.active { color: var(--pink); }
 .navitem:not(.active) { color: #6a6a6a; }
 .dotsbtn {
@@ -274,5 +274,20 @@ input, button { font-family: inherit; }
 .mydata-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--card-border); }
 .mydata-label { color: var(--text-dim); font-size: 13px; }
 .mydata-value { color: #fff; font-size: 13px; font-weight: 600; text-align: right; }
+
+.target-select { display: flex; gap: 8px; overflow-x: auto; padding: 0 22px 16px; scrollbar-width: none; }
+.target-select::-webkit-scrollbar { display: none; }
+.target-pill {
+  flex-shrink: 0; padding: 9px 16px; border-radius: 100px; background: var(--card); border: 1px solid var(--card-border);
+  color: #aaa; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.target-pill.active { background: var(--pink); border-color: var(--pink); color: #fff; }
+.target-pill-add { color: var(--pink); border-color: var(--pink); background: transparent; }
+
+.session-progress { text-align: center; padding: 20px 0; }
+.session-progress-bar { height: 6px; background: #222; border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+.session-progress-fill { height: 100%; background: var(--pink); border-radius: 6px; transition: width 0.5s ease; }
+.session-caption { color: #fff; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.session-note { color: var(--text-dim); font-size: 12.5px; line-height: 1.5; }
 
 .form-step { display: flex; flex-direction: column; }

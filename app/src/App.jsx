@@ -7,16 +7,19 @@ import Home from './components/Home'
 import ProductDetail from './components/ProductDetail'
 import MyData from './components/MyData'
 import MyCalculations from './components/MyCalculations'
+import AddPerson from './components/AddPerson'
 import { API } from './services/api'
 
 // stage: 'boot' | 'loading' | 'registration' | 'survey' | 'calculating' | 'app'
-// view (only when stage === 'app'): 'home' | 'product' | 'myData' | 'myCalculations'
+// view (only when stage === 'app'): 'home' | 'product' | 'myData' | 'myCalculations' | 'addPerson'
 const App = () => {
   const [user, setUser] = useState(null)
   const [stage, setStage] = useState('boot')
   const [view, setView] = useState('home')
   const [activeProduct, setActiveProduct] = useState(null)
-  const [homeCalc, setHomeCalc] = useState(null)
+  const [activeTarget, setActiveTarget] = useState('self')
+  const [addPersonReturnView, setAddPersonReturnView] = useState('myData')
+  const [peopleVersion, setPeopleVersion] = useState(0)
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp
@@ -53,7 +56,6 @@ const App = () => {
         const data = await response.json()
         setUser(data)
         if (!silent) {
-          // Вже зареєстрований: якщо немає дати народження — доопитати, інакше одразу в застосунок
           setStage(data.birthDate ? 'app' : 'survey')
         }
       } else if (!silent) {
@@ -77,16 +79,28 @@ const App = () => {
     setStage('calculating')
   }
 
-  const handleCalculatingDone = (calcResult) => {
-    setHomeCalc(calcResult)
+  const handleCalculatingDone = () => {
     setStage('app')
     setView('home')
   }
 
   const handleUserUpdate = (updatedUser) => setUser(updatedUser)
 
-  const openProduct = (product) => { setActiveProduct(product); setView('product') }
+  const openProduct = (product, personId) => {
+    setActiveProduct(product)
+    setActiveTarget(personId || 'self')
+    setView('product')
+  }
   const backToHome = () => setView('home')
+
+  const openAddPerson = (returnView) => {
+    setAddPersonReturnView(returnView)
+    setView('addPerson')
+  }
+  const handlePersonSaved = () => {
+    setPeopleVersion((v) => v + 1)
+    setView(addPersonReturnView)
+  }
 
   if (stage === 'boot') return null
   if (stage === 'loading') return <Loading onDone={handleLoadingDone} />
@@ -106,10 +120,32 @@ const App = () => {
         />
       )}
       {view === 'product' && (
-        <ProductDetail user={user} product={activeProduct} onUserUpdate={handleUserUpdate} onBack={backToHome} />
+        <ProductDetail
+          key={`${activeProduct?.id}_${activeTarget}_${peopleVersion}`}
+          user={user}
+          product={activeProduct}
+          initialTarget={activeTarget}
+          peopleVersion={peopleVersion}
+          onUserUpdate={handleUserUpdate}
+          onBack={backToHome}
+          onAddPerson={() => openAddPerson('product')}
+        />
       )}
-      {view === 'myData' && <MyData user={user} onBack={backToHome} />}
-      {view === 'myCalculations' && <MyCalculations onOpenProduct={openProduct} onBack={backToHome} />}
+      {view === 'myData' && (
+        <MyData
+          user={user}
+          peopleVersion={peopleVersion}
+          onUserUpdate={handleUserUpdate}
+          onBack={backToHome}
+          onAddPerson={() => openAddPerson('myData')}
+        />
+      )}
+      {view === 'myCalculations' && (
+        <MyCalculations user={user} onOpenProduct={openProduct} onBack={backToHome} />
+      )}
+      {view === 'addPerson' && (
+        <AddPerson user={user} onSaved={handlePersonSaved} onBack={() => setView(addPersonReturnView)} />
+      )}
     </div>
   )
 }
