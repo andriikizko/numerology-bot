@@ -100,7 +100,6 @@ const App = () => {
       {view === 'home' && (
         <Home
           user={user}
-          initialCalc={homeCalc}
           onOpenProduct={openProduct}
           onOpenMyData={() => setView('myData')}
           onOpenMyCalculations={() => setView('myCalculations')}
