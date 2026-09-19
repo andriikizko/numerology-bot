@@ -1,30 +1,20 @@
 import { useState } from 'react'
 import { API } from '../services/api'
 
-const SLIDES = [
-  { icon: '🔮', title: 'Ви більше, ніж думаєте', text: 'Відкрийте свій внутрішній потенціал через числа' },
-  { icon: '✨', title: 'Зрозумійте себе глибше', text: 'Точна нумерологія на основі дати народження' },
-  { icon: '🌙', title: 'Дізнайтесь свою долю', text: 'Число долі, кохання, гроші — все за 2 хвилини' },
-]
-
-// Реєстрація тепер збирає ТІЛЬКИ ім'я — жодних дат наперед.
-// Дати запитуються пізніше, саме в момент запуску конкретного розрахунку (ProductPage).
 const Registration = ({ onRegister }) => {
-  const [step, setStep] = useState('welcome')
-  const [slideIndex, setSlideIndex] = useState(0)
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-  const nextSlide = () => {
-    if (slideIndex < SLIDES.length - 1) {
-      setSlideIndex(slideIndex + 1)
-    } else {
-      setStep('name')
+  const handleSubmit = async () => {
+    if (!name.trim()) {
+      setError('Введіть ім\'я')
+      return
     }
-  }
-
-  const handleRegister = async () => {
     setLoading(true)
+    setError(null)
     try {
       const tg = window.Telegram?.WebApp
       let telegramId = tg?.initDataUnsafe?.user?.id
@@ -38,7 +28,9 @@ const Registration = ({ onRegister }) => {
 
       const userData = {
         telegramId,
-        name: name || 'Гість',
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
         createdAt: new Date().toISOString(),
         trialUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       }
@@ -46,62 +38,54 @@ const Registration = ({ onRegister }) => {
       const response = await fetch(API.registerUser, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       })
 
       if (response.ok) {
+        localStorage.setItem('numerology_user_id', String(telegramId))
         onRegister(userData)
       } else {
-        alert('Помилка реєстрації. Спробуйте ще раз.')
+        const errText = await response.text()
+        console.error('Registration failed:', response.status, errText)
+        setError('Помилка реєстрації. Спробуйте ще раз.')
       }
-    } catch (error) {
-      console.error('Помилка реєстрації:', error)
-      alert('Помилка реєстрації. Спробуйте ще раз.')
+    } catch (err) {
+      console.error(err)
+      setError('Немає з\'єднання. Спробуйте ще раз.')
     } finally {
       setLoading(false)
     }
   }
 
-  if (step === 'welcome') {
-    const slide = SLIDES[slideIndex]
-    return (
-      <div className="onboarding-container">
-        <div className="onboarding-slide">
-          <div className="onboarding-icon">{slide.icon}</div>
-          <h1>{slide.title}</h1>
-          <p>{slide.text}</p>
-        </div>
-        <div>
-          <div className="slide-dots">
-            {SLIDES.map((_, i) => (
-              <div key={i} className={`slide-dot ${i === slideIndex ? 'active' : ''}`} />
-            ))}
-          </div>
-          <button onClick={nextSlide} className="btn-primary" style={{ width: '100%' }}>
-            Продовжити →
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Останній крок — тільки ім'я, одразу після нього — головний екран
   return (
-    <div className="onboarding-container">
-      <div className="form-step">
-        <h1 style={{ marginBottom: 8 }}>Як вас звати?</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
-          Дати народження запитаємо пізніше — коли захочете зробити розрахунок
-        </p>
-        <input
-          type="text"
-          placeholder="Ваше ім'я"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <button onClick={handleRegister} className="btn-primary" disabled={!name || loading}>
-          {loading ? '⏳ Заходимо...' : 'Почати ✨'}
+    <div className="screen registration-screen">
+      <div className="reg-content">
+        <div className="reg-mark">🔮</div>
+        <div className="reg-headline">Давай<br />познайомимось</div>
+        <div className="reg-subtitle">Це потрібно, щоб зберегти твій код успіху</div>
+
+        <div className="field-label">Ім'я</div>
+        <input className="reg-field" type="text" placeholder="Як тебе звати?"
+          value={name} onChange={(e) => setName(e.target.value)} />
+
+        <div className="field-label">Телефон</div>
+        <input className="reg-field" type="tel" placeholder="+380 __ ___ __ __"
+          value={phone} onChange={(e) => setPhone(e.target.value)} />
+
+        <div className="field-label">Пошта</div>
+        <input className="reg-field" type="email" placeholder="name@example.com"
+          value={email} onChange={(e) => setEmail(e.target.value)} />
+
+        {error && <div className="reg-error">{error}</div>}
+
+        <div className="spacer" />
+
+        <button className="reg-cta" onClick={handleSubmit} disabled={loading}>
+          {loading ? '⏳ Зачекайте...' : 'Продовжити'}
         </button>
+        <div className="reg-legal">
+          Продовжуючи, ти погоджуєшся з <b>Умовами</b> та <b>Політикою конфіденційності</b>
+        </div>
       </div>
     </div>
   )

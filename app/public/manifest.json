@@ -1,11 +1,11 @@
 {
-  "name": "Нумерологія - Персональний Розрахунок",
-  "short_name": "Нумерологія",
+  "name": "Numira - Твій код успіху",
+  "short_name": "Numira",
   "description": "Дізнайтесь своє число долі та отримайте персональний нумерологічний розрахунок",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f3f4f6",
-  "theme_color": "#6366f1",
+  "background_color": "#0D0D0D",
+  "theme_color": "#D64A7A",
   "orientation": "portrait",
   "icons": [
     {

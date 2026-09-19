@@ -1,14 +1,22 @@
 import { useState, useEffect } from 'react'
-import MainMenu from './components/MainMenu'
-import ProductPage from './components/ProductPage'
-import Profile from './components/Profile'
+import Loading from './components/Loading'
 import Registration from './components/Registration'
+import Survey from './components/Survey'
+import Calculating from './components/Calculating'
+import Home from './components/Home'
+import ProductDetail from './components/ProductDetail'
+import MyData from './components/MyData'
+import MyCalculations from './components/MyCalculations'
 import { API } from './services/api'
 
+// stage: 'boot' | 'loading' | 'registration' | 'survey' | 'calculating' | 'app'
+// view (only when stage === 'app'): 'home' | 'product' | 'myData' | 'myCalculations'
 const App = () => {
   const [user, setUser] = useState(null)
-  const [currentPage, setCurrentPage] = useState('registration')
-  const [loading, setLoading] = useState(true)
+  const [stage, setStage] = useState('boot')
+  const [view, setView] = useState('home')
+  const [activeProduct, setActiveProduct] = useState(null)
+  const [homeCalc, setHomeCalc] = useState(null)
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp
@@ -25,64 +33,84 @@ const App = () => {
     if (userId) {
       loadUserData(userId)
     } else {
-      setLoading(false)
+      setStage('loading')
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && userId) {
-        loadUserData(userId)
+      if (document.visibilityState === 'visible' && userId && stage === 'app') {
+        loadUserData(userId, true)
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const loadUserData = async (userId) => {
+  const loadUserData = async (userId, silent = false) => {
     try {
       const response = await fetch(`${API.getUser}?id=${userId}`)
       if (response.ok) {
         const data = await response.json()
         setUser(data)
-        setCurrentPage('menu')
+        if (!silent) {
+          // Вже зареєстрований: якщо немає дати народження — доопитати, інакше одразу в застосунок
+          setStage(data.birthDate ? 'app' : 'survey')
+        }
+      } else if (!silent) {
+        setStage('loading')
       }
     } catch (error) {
       console.error('Помилка завантаження:', error)
-    } finally {
-      setLoading(false)
+      if (!silent) setStage('loading')
     }
   }
 
-  const handleRegistration = (userData) => {
-    localStorage.setItem('numerology_user_id', String(userData.telegramId))
+  const handleLoadingDone = () => setStage('registration')
+
+  const handleRegistered = (userData) => {
     setUser(userData)
-    setCurrentPage('menu')
+    setStage('survey')
   }
 
-  const handleUserUpdate = (updatedUser) => {
-    setUser(updatedUser)
+  const handleSurveyFinished = (userData) => {
+    setUser(userData)
+    setStage('calculating')
   }
 
-  if (loading) {
-    return <div className="loading">⏳ Завантаження...</div>
+  const handleCalculatingDone = (calcResult) => {
+    setHomeCalc(calcResult)
+    setStage('app')
+    setView('home')
   }
 
-  if (!user) {
-    return <Registration onRegister={handleRegistration} />
-  }
+  const handleUserUpdate = (updatedUser) => setUser(updatedUser)
 
+  const openProduct = (product) => { setActiveProduct(product); setView('product') }
+  const backToHome = () => setView('home')
+
+  if (stage === 'boot') return null
+  if (stage === 'loading') return <Loading onDone={handleLoadingDone} />
+  if (stage === 'registration') return <Registration onRegister={handleRegistered} />
+  if (stage === 'survey') return <Survey user={user} onFinish={handleSurveyFinished} />
+  if (stage === 'calculating') return <Calculating user={user} onDone={handleCalculatingDone} />
+
+  // stage === 'app'
   return (
-    <div className="app-container">
-      {currentPage === 'menu' && <MainMenu user={user} onNavigate={setCurrentPage} />}
-      {currentPage === 'product_general' && (
-        <ProductPage user={user} segment="general" onUserUpdate={handleUserUpdate} onBack={() => setCurrentPage('menu')} />
+    <div className="app-frame">
+      {view === 'home' && (
+        <Home
+          user={user}
+          initialCalc={homeCalc}
+          onOpenProduct={openProduct}
+          onOpenMyData={() => setView('myData')}
+          onOpenMyCalculations={() => setView('myCalculations')}
+        />
       )}
-      {currentPage === 'product_love' && (
-        <ProductPage user={user} segment="love" onUserUpdate={handleUserUpdate} onBack={() => setCurrentPage('menu')} />
+      {view === 'product' && (
+        <ProductDetail user={user} product={activeProduct} onUserUpdate={handleUserUpdate} onBack={backToHome} />
       )}
-      {currentPage === 'product_money' && (
-        <ProductPage user={user} segment="money" onUserUpdate={handleUserUpdate} onBack={() => setCurrentPage('menu')} />
-      )}
-      {currentPage === 'profile' && <Profile user={user} onBack={() => setCurrentPage('menu')} />}
+      {view === 'myData' && <MyData user={user} onBack={backToHome} />}
+      {view === 'myCalculations' && <MyCalculations onOpenProduct={openProduct} onBack={backToHome} />}
     </div>
   )
 }
