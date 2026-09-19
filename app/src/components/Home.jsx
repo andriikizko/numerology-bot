@@ -46,6 +46,7 @@ const Home = ({ user, initialCalc, onOpenProduct, onOpenMyData, onOpenMyCalculat
               <div className="horo-label" onClick={onOpenMyCalculations}>Мої розрахунки</div>
             </div>
             <div className="header-right">
+              <img className="header-logo" src="/logo-pink.png" alt="Numira" />
               <div className="date">{dateLabel}</div>
             </div>
           </div>

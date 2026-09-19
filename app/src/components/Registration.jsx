@@ -60,7 +60,7 @@ const Registration = ({ onRegister }) => {
   return (
     <div className="screen registration-screen">
       <div className="reg-content">
-        <div className="reg-mark">🔮</div>
+        <div className="reg-mark"><img src="/logo-white.png" alt="Numira" /></div>
         <div className="reg-headline">Давай<br />познайомимось</div>
         <div className="reg-subtitle">Це потрібно, щоб зберегти твій код успіху</div>
 

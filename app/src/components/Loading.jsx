@@ -14,7 +14,7 @@ const Loading = ({ onDone }) => {
         </div>
         <div className="loading-subtitle fade-in">Числа мають значення</div>
         <div className="loading-appname fade-in">Numira app</div>
-        <div className="loading-mark fade-in">🔮</div>
+        <div className="loading-mark fade-in"><img src="/logo-pink.png" alt="Numira" /></div>
       </div>
     </div>
   )
