@@ -10,6 +10,11 @@
   --text-dimmer: #6a6a6a;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -22,14 +27,26 @@ body {
 
 input, button { font-family: inherit; }
 
-.screen, .app-frame {
-  min-height: 100vh;
+.screen {
+  height: 100%;
+  width: 100%;
+  min-width: 0;
   max-width: 480px;
   margin: 0 auto;
   background: var(--bg);
   display: flex;
   flex-direction: column;
   position: relative;
+  overflow: hidden;
+}
+
+.app-frame {
+  height: 100vh;
+  height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -109,8 +126,8 @@ input, button { font-family: inherit; }
 .calc-caption { color: var(--text-dim); font-size: 14px; }
 
 /* ============ HOME ============ */
-.home-screen { background: var(--bg-frame); padding-bottom: 90px; }
-.home-scroll { flex: 1; overflow-y: auto; }
+.home-screen { background: var(--bg-frame); }
+.home-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
 .home-top { padding: 12px 22px 18px; display: flex; flex-direction: column; gap: 14px; }
 .header-row { display: flex; align-items: flex-start; justify-content: space-between; }
 .greet { color: var(--text-dim); font-size: 13px; margin-bottom: 4px; }
@@ -171,13 +188,14 @@ input, button { font-family: inherit; }
 
 /* NAVBAR */
 .navbar {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
+  position: absolute; bottom: 0; left: 0; right: 0;
   background: #0a0a0a; border-top: 1px solid #1c1c1c;
-  display: flex; align-items: center; justify-content: space-around; padding: 10px 10px 26px; z-index: 3;
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 10px 10px calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 3;
 }
 .navitem { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
-.navicon { font-size: 18px; line-height: 1; }
+.navicon { width: 22px; height: 22px; }
+.navicon svg { width: 100%; height: 100%; display: block; }
 .navlabel { font-size: 10.5px; }
 .navitem.active { color: var(--pink); }
 .navitem:not(.active) { color: #6a6a6a; }
@@ -189,7 +207,7 @@ input, button { font-family: inherit; }
 
 /* FULLSCREEN MENU */
 .menu-overlay {
-  position: fixed; inset: 0; max-width: 480px; margin: 0 auto;
+  position: absolute; inset: 0;
   background: rgba(0,0,0,0.98); display: none; flex-direction: column;
   padding: 26px 22px 0; z-index: 10;
 }
@@ -198,7 +216,7 @@ input, button { font-family: inherit; }
 .menu-title { color: #fff; font-size: 24px; font-weight: 800; }
 .menu-close { color: #fff; font-size: 22px; cursor: pointer; }
 .menu-sub { color: var(--text-dim); font-size: 13px; margin-bottom: 18px; }
-.menu-list { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding-bottom: 30px; }
+.menu-list { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 30px; }
 .menu-item {
   background: var(--card); border: 1px solid var(--card-border); border-radius: 16px;
   padding: 15px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer;
@@ -215,7 +233,7 @@ input, button { font-family: inherit; }
 .product-detail-screen { background: var(--bg-frame); }
 .pd-topbar { display: flex; align-items: center; padding: 20px 22px 10px; }
 .pd-back { color: #fff; font-size: 18px; cursor: pointer; }
-.pd-scroll { flex: 1; overflow-y: auto; padding-bottom: 140px; }
+.pd-scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 130px; }
 .pd-hero {
   margin: 8px 22px 20px;
   background: radial-gradient(circle at 80% 10%, #4a1f38 0%, #1c0f18 55%, #0d0d0d 100%);
@@ -232,10 +250,10 @@ input, button { font-family: inherit; }
 .pd-hint { color: var(--text-dim); font-size: 13px; margin-bottom: 10px; }
 
 .pd-bottombar {
-  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-  width: 100%; max-width: 480px;
+  position: absolute; bottom: 0; left: 0; right: 0;
   background: #0a0a0a; border-top: 1px solid #1c1c1c;
-  padding: 16px 22px 26px; display: flex; flex-direction: column; gap: 10px; z-index: 3;
+  padding: 16px 22px calc(16px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 10px; z-index: 3;
 }
 .pd-price-line { display: flex; align-items: baseline; gap: 10px; justify-content: center; }
 .pd-price-new { color: #fff; font-size: 24px; font-weight: 800; }

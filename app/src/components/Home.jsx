@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API } from '../services/api'
 import { calcLifePathLocal, lifePathLabel, PRODUCTS } from '../utils/numerology'
+import { IconHome, IconPerson, IconChart } from './icons'
 
 const WEEKDAYS = ['неділі', 'понеділка', 'вівторка', 'середи', 'четверга', 'п\'ятниці', 'суботи']
 const MONTHS = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
@@ -103,18 +104,18 @@ const Home = ({ user, initialCalc, onOpenProduct, onOpenMyData, onOpenMyCalculat
 
       <div className="navbar">
         <div className="navitem active">
-          <div className="navicon">🏠</div>
+          <div className="navicon"><IconHome /></div>
           <div className="navlabel">Головна</div>
         </div>
         <div className="navitem" onClick={onOpenMyData}>
-          <div className="navicon">👤</div>
+          <div className="navicon"><IconPerson /></div>
           <div className="navlabel">Мої дані</div>
         </div>
         <div className="dotsbtn" onClick={() => setMenuOpen(true)}>
           <span /><span /><span /><span /><span /><span /><span /><span /><span />
         </div>
         <div className="navitem" onClick={onOpenMyCalculations}>
-          <div className="navicon">📊</div>
+          <div className="navicon"><IconChart /></div>
           <div className="navlabel">Розрахунки</div>
         </div>
       </div>
@@ -135,8 +136,9 @@ const Home = ({ user, initialCalc, onOpenProduct, onOpenMyData, onOpenMyCalculat
               <div className="menu-item-right">
                 <div className="price-row">
                   <span className="price-old">{p.priceOld} грн</span>
-                  <span className="price-new">{p.priceNew} грн</span>
+                  <span className="price-badge">Акція</span>
                 </div>
+                <div className="price-new">{p.priceNew} грн</div>
                 <div className="details-link">Дізнатися деталі →</div>
               </div>
             </div>
