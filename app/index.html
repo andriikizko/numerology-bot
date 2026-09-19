@@ -45,8 +45,24 @@
   <script type="module" src="/src/index.jsx"></script>
   <script>
     if ("serviceWorker" in navigator) {
+      let refreshing = false;
+      // Коли новий SW бере контроль (після деплою нової версії) —
+      // автоматично перезавантажуємо сторінку один раз, щоб підтягнути свіжі файли.
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch(() => {});
+        navigator.serviceWorker
+          .register("/sw.js", { updateViaCache: "none" })
+          .then((reg) => {
+            // Перевіряємо оновлення відразу і потім періодично
+            reg.update().catch(() => {});
+            setInterval(() => reg.update().catch(() => {}), 60 * 1000);
+          })
+          .catch(() => {});
       });
     }
   </script>
