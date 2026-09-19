@@ -5,6 +5,7 @@ import Users from './pages/Users'
 import Payments from './pages/Payments'
 import Support from './pages/Support'
 import Analytics from './pages/Analytics'
+import HomeCards from './pages/HomeCards'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/payments" element={<Payments />} />
           <Route path="/support" element={<Support />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/home-cards" element={<HomeCards />} />
         </Routes>
       </Layout>
     </Router>

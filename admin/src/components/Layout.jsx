@@ -9,7 +9,8 @@ export default function Layout({ children }) {
     { path: '/users', icon: '👥', label: 'Користувачи' },
     { path: '/payments', icon: '💳', label: 'Платежи' },
     { path: '/support', icon: '💬', label: 'Підтримка' },
-    { path: '/analytics', icon: '📈', label: 'Аналітика' }
+    { path: '/analytics', icon: '📈', label: 'Аналітика' },
+    { path: '/home-cards', icon: '🖼️', label: 'Картки головної' }
   ]
 
   return (
