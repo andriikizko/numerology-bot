@@ -120,15 +120,15 @@ const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
           <div className="navicon"><IconPerson /></div>
           <div className="navlabel">Мої дані</div>
         </div>
+        <div className="navitem" onClick={onOpenMyCalculations}>
+          <div className="navicon"><IconChart /></div>
+          <div className="navlabel">Мої розрахунки</div>
+        </div>
         <div className="navitem" onClick={() => setMenuOpen(true)}>
           <div className="dotsbtn">
             <span /><span /><span /><span /><span /><span /><span /><span /><span />
           </div>
           <div className="navlabel">Замовити розрахунок</div>
-        </div>
-        <div className="navitem" onClick={onOpenMyCalculations}>
-          <div className="navicon"><IconChart /></div>
-          <div className="navlabel">Мої розрахунки</div>
         </div>
       </div>
 
