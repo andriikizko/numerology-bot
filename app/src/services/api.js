@@ -18,4 +18,5 @@ export const API = {
   getPeople: `${BASE_URL}/getPeople`,
   updatePerson: `${BASE_URL}/updatePerson`,
   getHomeCards: `${BASE_URL}/getHomeCards`,
+  deleteAccount: `${BASE_URL}/deleteAccount`,
 };

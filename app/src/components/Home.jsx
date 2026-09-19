@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API } from '../services/api'
 import { calcLifePathLocal, lifePathLabel, PRODUCTS } from '../utils/numerology'
-import { IconHome, IconPerson, IconChart } from './icons'
+import { IconHome, IconPerson, IconChart, IconCard } from './icons'
 
 const DEFAULT_CARDS = [
   {
@@ -18,7 +18,7 @@ const DEFAULT_CARDS = [
 
 const MONTHS = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
 
-const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
+const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations, onOpenSubscriptions }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [cards, setCards] = useState(DEFAULT_CARDS)
 
@@ -57,7 +57,6 @@ const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
           <div className="header-row">
             <div>
               <div className="name">{user.name || 'Друже'}</div>
-              <div className="horo-label" onClick={onOpenMyCalculations}>Мої розрахунки</div>
             </div>
             <div className="header-right">
               <img className="header-logo" src="/logo-pink.png" alt="Numira" />
@@ -119,6 +118,10 @@ const Home = ({ user, onOpenProduct, onOpenMyData, onOpenMyCalculations }) => {
         <div className="navitem" onClick={onOpenMyData}>
           <div className="navicon"><IconPerson /></div>
           <div className="navlabel">Мої дані</div>
+        </div>
+        <div className="navitem" onClick={onOpenSubscriptions}>
+          <div className="roundbtn"><IconCard /></div>
+          <div className="navlabel">Підписка і оплати</div>
         </div>
         <div className="navitem" onClick={onOpenMyCalculations}>
           <div className="navicon"><IconChart /></div>

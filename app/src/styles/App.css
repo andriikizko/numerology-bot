@@ -200,6 +200,12 @@ input, button { font-family: inherit; }
   display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; place-items: center; padding: 11px; cursor: pointer;
 }
 .dotsbtn span { width: 4px; height: 4px; border-radius: 50%; background: #fff; }
+.roundbtn {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--pink);
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  box-shadow: 0 4px 14px rgba(214, 74, 122, 0.45);
+}
+.roundbtn svg { width: 20px; height: 20px; }
 
 /* FULLSCREEN MENU */
 .menu-overlay {
@@ -271,9 +277,23 @@ input, button { font-family: inherit; }
 .calc-point.locked { text-align: center; }
 .lock-label { color: var(--text-dim); font-size: 13px; }
 
-.mydata-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--card-border); }
+.mydata-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--card-border); }
 .mydata-label { color: var(--text-dim); font-size: 13px; }
 .mydata-value { color: #fff; font-size: 13px; font-weight: 600; text-align: right; }
+.mydata-row-actions { display: flex; gap: 10px; flex-shrink: 0; margin-left: 12px; }
+.mydata-icon-btn { cursor: pointer; font-size: 15px; opacity: 0.85; }
+.mydata-row-edit { flex-direction: column; align-items: stretch; gap: 8px; }
+.mydata-edit-field { margin-bottom: 0; }
+.mydata-row-confirm {
+  background: rgba(214,74,122,0.08); border: 1px solid rgba(214,74,122,0.3); border-radius: 12px;
+  padding: 14px; margin: 8px 0; display: flex; flex-direction: column; gap: 10px;
+}
+.mydata-confirm-text { color: #fff; font-size: 13px; line-height: 1.5; }
+.mydata-confirm-actions { display: flex; gap: 10px; }
+.mydata-btn-danger { background: #e5484d; color: #fff; border: none; border-radius: 100px; padding: 10px 16px; font-size: 13px; font-weight: 700; flex: 1; }
+.mydata-btn-save { background: var(--pink); color: #fff; border: none; border-radius: 100px; padding: 10px 16px; font-size: 13px; font-weight: 700; flex: 1; }
+.mydata-btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--card-border); border-radius: 100px; padding: 10px 16px; font-size: 13px; font-weight: 600; flex: 1; }
+.mydata-delete-account { background: transparent; color: #e5484d; border: 1px solid #e5484d; border-radius: 100px; padding: 14px; font-size: 14px; font-weight: 700; width: 100%; }
 
 .target-select { display: flex; gap: 8px; overflow-x: auto; padding: 0 22px 16px; scrollbar-width: none; }
 .target-select::-webkit-scrollbar { display: none; }

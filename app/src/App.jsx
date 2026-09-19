@@ -8,19 +8,24 @@ import ProductDetail from './components/ProductDetail'
 import MyData from './components/MyData'
 import MyCalculations from './components/MyCalculations'
 import AddPerson from './components/AddPerson'
+import Subscriptions from './components/Subscriptions'
 import { API } from './services/api'
 
-// stage: 'boot' | 'loading' | 'registration' | 'survey' | 'calculating' | 'app'
-// view (only when stage === 'app'): 'home' | 'product' | 'myData' | 'myCalculations' | 'addPerson'
+// stage: 'loading' | 'registration' | 'survey' | 'calculating' | 'app'
+// view (only when stage === 'app'): 'home' | 'product' | 'myData' | 'myCalculations' | 'addPerson' | 'subscriptions'
 const App = () => {
   const [user, setUser] = useState(null)
-  const [stage, setStage] = useState('boot')
+  const [stage, setStage] = useState('loading')
+  const [pendingStage, setPendingStage] = useState(null)
+  const [timerDone, setTimerDone] = useState(false)
   const [view, setView] = useState('home')
   const [activeProduct, setActiveProduct] = useState(null)
   const [activeTarget, setActiveTarget] = useState('self')
   const [addPersonReturnView, setAddPersonReturnView] = useState('myData')
   const [peopleVersion, setPeopleVersion] = useState(0)
 
+  // Екран завантаження показується щоразу при вході/оновленні, поки паралельно
+  // визначаємо, куди вести користувача (реєстрація / опитування / застосунок).
   useEffect(() => {
     const tg = window.Telegram?.WebApp
     let userId = null
@@ -36,7 +41,7 @@ const App = () => {
     if (userId) {
       loadUserData(userId)
     } else {
-      setStage('loading')
+      setPendingStage('registration')
     }
 
     const handleVisibilityChange = () => {
@@ -49,6 +54,14 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Переходимо далі лише коли й таймер спалеша минув, і дані вже відомі
+  useEffect(() => {
+    if (timerDone && pendingStage) {
+      setStage(pendingStage)
+      if (pendingStage === 'app') setView('home')
+    }
+  }, [timerDone, pendingStage])
+
   const loadUserData = async (userId, silent = false) => {
     try {
       const response = await fetch(`${API.getUser}?id=${userId}`)
@@ -56,18 +69,18 @@ const App = () => {
         const data = await response.json()
         setUser(data)
         if (!silent) {
-          setStage(data.birthDate ? 'app' : 'survey')
+          setPendingStage(data.birthDate ? 'app' : 'survey')
         }
       } else if (!silent) {
-        setStage('loading')
+        setPendingStage('registration')
       }
     } catch (error) {
       console.error('Помилка завантаження:', error)
-      if (!silent) setStage('loading')
+      if (!silent) setPendingStage('registration')
     }
   }
 
-  const handleLoadingDone = () => setStage('registration')
+  const handleLoadingDone = () => setTimerDone(true)
 
   const handleRegistered = (userData) => {
     setUser(userData)
@@ -102,7 +115,6 @@ const App = () => {
     setView(addPersonReturnView)
   }
 
-  if (stage === 'boot') return null
   if (stage === 'loading') return <Loading onDone={handleLoadingDone} />
   if (stage === 'registration') return <Registration onRegister={handleRegistered} />
   if (stage === 'survey') return <Survey user={user} onFinish={handleSurveyFinished} />
@@ -117,8 +129,10 @@ const App = () => {
           onOpenProduct={openProduct}
           onOpenMyData={() => setView('myData')}
           onOpenMyCalculations={() => setView('myCalculations')}
+          onOpenSubscriptions={() => setView('subscriptions')}
         />
       )}
+      {view === 'subscriptions' && <Subscriptions onBack={backToHome} />}
       {view === 'product' && (
         <ProductDetail
           key={`${activeProduct?.id}_${activeTarget}_${peopleVersion}`}
@@ -138,6 +152,7 @@ const App = () => {
           onUserUpdate={handleUserUpdate}
           onBack={backToHome}
           onAddPerson={() => openAddPerson('myData')}
+          onLoggedOut={() => window.location.reload()}
         />
       )}
       {view === 'myCalculations' && (

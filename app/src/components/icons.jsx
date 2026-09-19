@@ -20,3 +20,11 @@ export const IconChart = () => (
     <path d="M20 19V9" />
   </svg>
 )
+
+export const IconCard = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2.2" />
+    <path d="M3 10h18" />
+    <path d="M7 15h4" />
+  </svg>
+)

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 const Loading = ({ onDone }) => {
   useEffect(() => {
-    const t = setTimeout(onDone, 2400)
+    const t = setTimeout(onDone, 3000)
     return () => clearTimeout(t)
   }, [onDone])
 

@@ -1,14 +1,89 @@
 import { useState, useEffect } from 'react'
 import { API } from '../services/api'
 
-const MyData = ({ user, onUserUpdate, onBack, onAddPerson, peopleVersion }) => {
-  const [motherBirthDate, setMotherBirthDate] = useState(user.motherBirthDate || '')
-  const [fatherBirthDate, setFatherBirthDate] = useState(user.fatherBirthDate || '')
-  const [partnerBirthDate, setPartnerBirthDate] = useState(user.partnerBirthDate || '')
+const FIELDS = [
+  { key: 'name', label: "Ім'я", type: 'text', required: true },
+  { key: 'phone', label: 'Телефон', type: 'tel' },
+  { key: 'email', label: 'Пошта', type: 'email' },
+  { key: 'birthDate', label: 'Дата народження', type: 'date' },
+  { key: 'motherBirthDate', label: 'Дата народження мами', type: 'date' },
+  { key: 'fatherBirthDate', label: 'Дата народження тата', type: 'date' },
+  { key: 'partnerBirthDate', label: 'Дата народження партнера', type: 'date' },
+]
+
+const Row = ({ field, value, onSave, onDelete }) => {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(value || '')
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState(null)
+
+  const startEdit = () => { setDraft(value || ''); setEditing(true) }
+
+  const save = async () => {
+    setSaving(true)
+    await onSave(field.key, draft)
+    setSaving(false)
+    setEditing(false)
+  }
+
+  const confirmDelete = async () => {
+    setSaving(true)
+    await onDelete(field.key)
+    setSaving(false)
+    setConfirmingDelete(false)
+  }
+
+  if (confirmingDelete) {
+    return (
+      <div className="mydata-row mydata-row-confirm">
+        <div className="mydata-confirm-text">Точно видалити "{field.label}"?</div>
+        <div className="mydata-confirm-actions">
+          <button className="mydata-btn-danger" onClick={confirmDelete} disabled={saving}>Так, видалити</button>
+          <button className="mydata-btn-ghost" onClick={() => setConfirmingDelete(false)}>Скасувати</button>
+        </div>
+      </div>
+    )
+  }
+
+  if (editing) {
+    return (
+      <div className="mydata-row mydata-row-edit">
+        <div className="mydata-label">{field.label}</div>
+        <input
+          className="reg-field mydata-edit-field"
+          type={field.type}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <div className="mydata-confirm-actions">
+          <button className="mydata-btn-save" onClick={save} disabled={saving}>{saving ? '⏳' : 'Зберегти'}</button>
+          <button className="mydata-btn-ghost" onClick={() => setEditing(false)}>Скасувати</button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mydata-row">
+      <div>
+        <div className="mydata-label">{field.label}</div>
+        <div className="mydata-value">{value || '—'}</div>
+      </div>
+      <div className="mydata-row-actions">
+        <span className="mydata-icon-btn" onClick={startEdit}>✏️</span>
+        {!field.required && value && (
+          <span className="mydata-icon-btn" onClick={() => setConfirmingDelete(true)}>🗑️</span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const MyData = ({ user, onUserUpdate, onBack, onAddPerson, onLoggedOut, peopleVersion }) => {
   const [people, setPeople] = useState([])
+  const [error, setError] = useState(null)
+  const [confirmingAccountDelete, setConfirmingAccountDelete] = useState(false)
+  const [deletingAccount, setDeletingAccount] = useState(false)
 
   useEffect(() => {
     fetch(`${API.getPeople}?userId=${user.telegramId}`)
@@ -17,12 +92,10 @@ const MyData = ({ user, onUserUpdate, onBack, onAddPerson, peopleVersion }) => {
       .catch(() => {})
   }, [user.telegramId, peopleVersion])
 
-  const handleSave = async () => {
-    setSaving(true)
+  const saveField = async (key, value) => {
     setError(null)
-    setSaved(false)
     try {
-      const updatedUser = { ...user, motherBirthDate, fatherBirthDate, partnerBirthDate }
+      const updatedUser = { ...user, [key]: value }
       const response = await fetch(API.registerUser, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -30,15 +103,37 @@ const MyData = ({ user, onUserUpdate, onBack, onAddPerson, peopleVersion }) => {
       })
       if (response.ok) {
         onUserUpdate(updatedUser)
-        setSaved(true)
       } else {
         setError('Не вдалося зберегти. Спробуйте ще раз.')
       }
     } catch (err) {
       console.error(err)
       setError('Немає з\'єднання. Спробуйте ще раз.')
-    } finally {
-      setSaving(false)
+    }
+  }
+
+  const deleteField = async (key) => saveField(key, null)
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true)
+    setError(null)
+    try {
+      const response = await fetch(API.deleteAccount, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.telegramId }),
+      })
+      if (response.ok) {
+        localStorage.removeItem('numerology_user_id')
+        onLoggedOut()
+      } else {
+        setError('Не вдалося видалити акаунт. Спробуйте ще раз.')
+        setDeletingAccount(false)
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Немає з\'єднання. Спробуйте ще раз.')
+      setDeletingAccount(false)
     }
   }
 
@@ -52,26 +147,10 @@ const MyData = ({ user, onUserUpdate, onBack, onAddPerson, peopleVersion }) => {
         </div>
 
         <div className="pd-section">
-          <div className="mydata-row"><div className="mydata-label">Ім'я</div><div className="mydata-value">{user.name}</div></div>
-          <div className="mydata-row"><div className="mydata-label">Телефон</div><div className="mydata-value">{user.phone || '—'}</div></div>
-          <div className="mydata-row"><div className="mydata-label">Пошта</div><div className="mydata-value">{user.email || '—'}</div></div>
-          <div className="mydata-row"><div className="mydata-label">Дата народження</div><div className="mydata-value">{user.birthDate || '—'}</div></div>
-        </div>
-
-        <div className="pd-section">
-          <div className="pd-section-title">Дати батьків (для повного розрахунку)</div>
           {error && <div className="reg-error">{error}</div>}
-          <div className="form-step">
-            <label className="field-label">Дата народження мами</label>
-            <input className="reg-field" type="date" value={motherBirthDate} onChange={(e) => { setMotherBirthDate(e.target.value); setSaved(false) }} />
-            <label className="field-label">Дата народження тата</label>
-            <input className="reg-field" type="date" value={fatherBirthDate} onChange={(e) => { setFatherBirthDate(e.target.value); setSaved(false) }} />
-            <label className="field-label">Дата народження партнера (для "Кохання")</label>
-            <input className="reg-field" type="date" value={partnerBirthDate} onChange={(e) => { setPartnerBirthDate(e.target.value); setSaved(false) }} />
-            <button className="pd-secondary-cta" onClick={handleSave} disabled={saving}>
-              {saving ? '⏳ Збереження…' : saved ? '✓ Збережено' : 'Зберегти зміни'}
-            </button>
-          </div>
+          {FIELDS.map((field) => (
+            <Row key={field.key} field={field} value={user[field.key]} onSave={saveField} onDelete={deleteField} />
+          ))}
         </div>
 
         <div className="pd-section">
@@ -86,6 +165,26 @@ const MyData = ({ user, onUserUpdate, onBack, onAddPerson, peopleVersion }) => {
             </div>
           ))}
           <button className="pd-secondary-cta" onClick={onAddPerson}>+ Додати людину</button>
+        </div>
+
+        <div className="pd-section">
+          {!confirmingAccountDelete ? (
+            <button className="mydata-delete-account" onClick={() => setConfirmingAccountDelete(true)}>
+              Видалити акаунт
+            </button>
+          ) : (
+            <div className="mydata-row-confirm">
+              <div className="mydata-confirm-text">
+                Це видалить усі твої дані назавжди, включно з розрахунками. Скасувати не можна.
+              </div>
+              <div className="mydata-confirm-actions">
+                <button className="mydata-btn-danger" onClick={handleDeleteAccount} disabled={deletingAccount}>
+                  {deletingAccount ? '⏳ Видалення…' : 'Так, видалити назавжди'}
+                </button>
+                <button className="mydata-btn-ghost" onClick={() => setConfirmingAccountDelete(false)}>Скасувати</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
